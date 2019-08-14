@@ -5,18 +5,12 @@ url:
         kwargs:
             function: Test_3.Query 
             headers:
-                Content-Type: application/json 
-  superstore-data:
-    pattern: /$YAMLURL/data
-    handler: FormHandler
-    kwargs:
-      url: $YAMLPATH/store-sales.csv
-  store-sales-ctab:
-    pattern: /$YAMLURL/store-sales-ctab
-    handler: FormHandler
-    kwargs:
-      url: $YAMLPATH/store-sales.csv
-      modify: data.groupby(['Category', 'Region'])['Sales'].sum().reset_index()
+                Content-Type: application/json
+        
+            
+           
+            
+  
 
 import:
   ui:

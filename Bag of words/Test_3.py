@@ -19,4 +19,6 @@ def transform(sample1):
 
 def Query(handler):
     query= handler.get_argument("query")
+    #handler.set_header('Content-Disposition'",value="k")
+    
     return transform(query)
