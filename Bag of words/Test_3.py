@@ -1,45 +1,44 @@
-
-
-import tornado  
-
-import os
+import tornado
+import requests
+import numpy as np
+import elasticsearch as es
+import scipy
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 import numpy as np
+
 vectorizer=TfidfVectorizer()
-file_list = [f for f in os.listdir('.') if os.path.isfile(os.path.join('.', f)) and f.endswith("csv")]
+e=es.Elasticsearch()
+c=es.client.CatClient(e)
+i=es.client.IndicesClient(e)
+dict={}
 
-fcmap={}
-columnf= open("columns","w+")
-for f in file_list:
-    csvf = open(f)
-    columnl=csvf.__next__().split(",")
-    fcmap[f]=columnl
-    for word in columnl:
-        columnf.write(word+"\n")
-    csvf.close()
+listI=c.indices(h="index").split("\n")
+corpus=[]
+for ind in listI:
+    if ind=='':
+        continue
+    mappings=i.get_mapping(index=ind)
+    columns= mappings[ind]["mappings"]["properties"].keys()
 
-columnf.close()
-columnf=open("columns")
-corpus = columnf.readlines()
+    keysAsList= list(columns)
+
+    corpus=corpus+keysAsList
+    dict[ind]=list(keysAsList)
+
 X = vectorizer.fit_transform(corpus)
 Y = X.toarray()
 
-
-
-
 def transform(sample1):
-    X = vectorizer.transform([sample1])
+    X = vectorizer.transform(["what"])
     p=cosine_similarity(X,Y).ravel().argmax()
-    word=corpus[p][:-1]
-    filename=""
-    for f in fcmap:
-        columnl=fcmap[f]
-        for column in columnl:
-            if(word==column):
-                filename=f
-    return ("File : "+filename+" Column : "+corpus[p])
+    word=corpus[p]
+    indexname=""
+    for (key,value) in dict.items():
+        if word in value:
+            indexname=key
+    return ("IndexName :"+indexname+" Column:"+word)
 def Query(handler):
     query= handler.get_argument("query")
-    #handler.set_header('Content-Disposition'",value="k")
     return transform(query)
+
