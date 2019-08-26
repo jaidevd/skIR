@@ -30,7 +30,7 @@ X = vectorizer.fit_transform(corpus)
 Y = X.toarray()
 
 def transform(sample1):
-    X = vectorizer.transform(["what"])
+    X = vectorizer.transform([sample1])
     p=cosine_similarity(X,Y).ravel().argmax()
     word=corpus[p]
     indexname=""
